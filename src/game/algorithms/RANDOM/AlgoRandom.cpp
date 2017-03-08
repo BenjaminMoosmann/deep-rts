@@ -40,7 +40,7 @@ void AlgoRandom::terminal() {
 
 }
 
-std::shared_ptr<BaseAction> AlgoRandom::findBestAction(std::shared_ptr<Unit> unit) {
+std::shared_ptr<BaseAction> AlgoRandom::findBestAction(State::Unit * unit) {
     int randomIndex = rand() % actionSpace.size();
     int actionID = actionSpace[randomIndex];
     std::shared_ptr<BaseAction> selectedAction = getAction(actionID, unit);

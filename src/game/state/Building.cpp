@@ -7,7 +7,7 @@
 #include "../util/Pathfinder.h"
 
 
-void Building::update(std::shared_ptr<Unit> unit)const{
+void Building::update(State::Unit *uState)const{
 
     unit->buildTimer += 1;
     if(unit->buildTimer >= unit->buildEntity->spawnDuration) {
@@ -30,11 +30,11 @@ void Building::update(std::shared_ptr<Unit> unit)const{
 
 }
 
-void Building::end(std::shared_ptr<Unit> unit)const{
+void Building::end(State::Unit *uState)const{
 
 }
 
-void Building::init(std::shared_ptr<Unit> unit)const{
+void Building::init(State::Unit *uState)const{
     unit->buildTimer = 0;
 
 }

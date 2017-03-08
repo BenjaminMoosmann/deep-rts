@@ -8,8 +8,8 @@
 
 InventoryManager::InventoryManager(Player &player) {
 
-    townhall.push_back(std::shared_ptr<Unit>(new Peasant(player)));
-    peasant.push_back(std::shared_ptr<Unit>(new TownHall(player)));
+    townhall.push_back(State::Unit *(new Peasant(player)));
+    peasant.push_back(State::Unit *(new TownHall(player)));
 
 
 }

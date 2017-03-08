@@ -17,14 +17,16 @@ namespace Constants{
     const int Tile_Grass = 271;
 
 
-    const int State_Idle = 8;
-    const int State_Spawning = 1;
-    const int State_Walking = 2;
-    const int State_Despawned = 3;
-    const int State_Harvesting = 4;
-    const int State_Building = 5;
-    const int State_Combat = 6;
-    const int State_Dead = 7;
+	enum State {
+		Idle = 8,
+		Spawning = 1,
+		Walking = 2,
+		Despawned = 3,
+		Harvesting = 4,
+		Building = 5,
+		Combat = 6,
+		Dead = 7,
+	};
 
     const int Pathfinding_Walkable = 1;
     const int Pathfinding_All = 2;

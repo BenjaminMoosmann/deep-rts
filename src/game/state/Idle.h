@@ -11,12 +11,12 @@
 class Idle: public BaseState {
 
 public:
-    Idle():BaseState(Constants::State_Idle){
+    Idle():BaseState(Constants::State::Idle){
         name = "Idle";
     }
-    virtual void update(std::shared_ptr<Unit> unit)const;
-    virtual void init(std::shared_ptr<Unit> unit)const;
-    virtual void end(std::shared_ptr<Unit> unit)const;
+    virtual void update(State::Unit *uState)const;;
+    virtual void init(State::Unit *uState)const;;
+    virtual void end(State::Unit *uState)const;;
 
 };
 

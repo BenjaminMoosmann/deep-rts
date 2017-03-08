@@ -35,7 +35,9 @@ public:
 
     std::vector<Tile *> getTiles(Tile *source, int width, int height);
 
+	uint16_t getTileIdx(uint16_t x, uint16_t y);
     Tile *getTile(int x, int y);
+	Tile *getTile(uint16_t tileID);
 
     json tilesData;
     int tFirstGid;

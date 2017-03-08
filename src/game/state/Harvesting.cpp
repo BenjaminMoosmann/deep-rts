@@ -8,29 +8,29 @@
 #include "../util/Pathfinder.h"
 #include "../player/Player.h"
 
-void Harvesting::update(std::shared_ptr<Unit> unit)const{
+void Harvesting::update(State::Unit * unit)const{
 
     if (unit->harvestIterator == 0) {
         // Go to harvestable_tile;
 
-        if(unit->distance(*unit->harvestTarget) > 1) {
+        if(Unit::distance(unit, unit->harvestTile()) > 1) {
             // Must walk
             // Find closest walkable tile to the target
-            Tile* closestWalkable = Pathfinder::find_first_walkable_tile(unit->harvestTarget);
+            Tile* closestWalkable = Pathfinder::find_first_walkable_tile(unit->harvestTile());
 
             // If distance is > 1, change harvest_target
-            if(closestWalkable->distance(unit->harvestTarget) > 1) {
+            if(closestWalkable->distance(unit->harvestTile()) > 1) {
                 Tile *closestHarvestable = Pathfinder::find_first_harvestable_tile(closestWalkable);
                 if(!closestHarvestable){
-                    unit->transitionState(unit->stateManager.idleState);
+					Unit::transitionState(unit, Constants::State::Idle);
                     return;
                 }
-                unit->harvestTarget = closestHarvestable;
+                unit->mutate_harvestTile(closestHarvestable->id_);
 
 
             }
 
-            unit->walkingGoal = closestWalkable;
+            unit->mutate_walkGoal(closestWalkable->id_);
             unit->transitionState(unit->stateManager.walkingState);
             unit->enqueueState(unit->stateManager.harvestingState);
         }
@@ -84,7 +84,7 @@ void Harvesting::update(std::shared_ptr<Unit> unit)const{
 
     } else if (unit->harvestIterator == 2) {
         // Recall (Walking)
-        std::shared_ptr<Unit> closestBase = unit->closestRecallBuilding();
+        State::Unit * closestBase = unit->closestRecallBuilding();
 
         // No base to recall to
         if (!closestBase) {
@@ -120,11 +120,11 @@ void Harvesting::update(std::shared_ptr<Unit> unit)const{
     }
 }
 
-void Harvesting::end(std::shared_ptr<Unit> unit)const{
+void Harvesting::end(State::Unit * unit)const{
 
 }
 
-void Harvesting::init(std::shared_ptr<Unit> unit)const{
+void Harvesting::init(State::Unit * unit)const{
     unit->harvestTimer = 0;
     unit->harvestIterator = 0;
 }

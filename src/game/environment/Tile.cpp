@@ -21,7 +21,7 @@ sf::Vector2f Tile::getPixelPosition()const {
     return sf::Vector2f(vertices->position.x, vertices->position.y);
 }
 
-bool Tile::isAttackable(std::shared_ptr<Unit> unit) {
+bool Tile::isAttackable(State::Unit * unit) {
     if (!occupant)
         return false;
 
@@ -37,7 +37,7 @@ bool Tile::isHarvestable() {
     return harvestable;
 }
 
-void Tile::setOccupant(std::shared_ptr<Unit> unit) {
+void Tile::setOccupant(State::Unit * unit) {
     occupant = unit;
 }
 

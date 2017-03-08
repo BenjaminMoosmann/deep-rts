@@ -13,8 +13,8 @@ class InventoryManager {
 
 public:
     InventoryManager(Player &player);
-    std::vector<std::shared_ptr<Unit>> townhall;
-    std::vector<std::shared_ptr<Unit>> peasant;
+    std::vector<State::Unit *> townhall;
+    std::vector<State::Unit *> peasant;
 };
 
 

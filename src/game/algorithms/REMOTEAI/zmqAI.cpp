@@ -31,7 +31,7 @@ void zmqAI::start() {
 	while (true) {
 		zmq::message_t request;
 		socket.recv(&request);
-		std::cout << request.size() << std::endl;
+	
 		std::string request_str = std::string(static_cast<char*>(request.data()), request.size());
 		json data = json::parse(request_str.data());
 		
@@ -43,7 +43,31 @@ void zmqAI::start() {
 			zmq::message_t reply(json.size());
 			memcpy(reply.data(), json.data(), json.size());
 			socket.send(reply);
-		}	
+		}
+		else if (data["type"] == "doAction") {
+			// This Means get state
+			int tileIndex = data["data"][0];
+			std::string mouseButton = data["data"][1];
+
+			Game::getGame(gameID)->getPlayer(playerID)->click(mouseButton, tileIndex);
+
+			json retData;
+			retData["score"] = Game::getGame(gameID)->getPlayer(playerID)->getScore();
+			retData["terminal"] = Game::getGame(gameID)->getPlayer(playerID)->defeated;
+			std::string dump = retData.dump();
+			zmq::message_t reply(dump.size());
+			memcpy(reply.data(), dump.data(), dump.size());
+			socket.send(reply);
+		}
+		counter += 1;
+
+		now = clock();
+		if (now > next) {
+			next = now + 1000;
+			std::cout << "zmqAI Iterations: " << counter << std::endl;
+			counter = 0;
+		}
+
 	}
 
 

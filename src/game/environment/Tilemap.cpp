@@ -165,6 +165,17 @@ Tile *Tilemap::getTile(int x, int y){
     return &tiles[idx];
 }
 
+Tile *Tilemap::getTile(uint16_t tileID) {
+	Tile *t = &tiles[tileID];
+	assert(t && "Tile was not found (nullptr)");
+	return t;
+}
+
+
+uint16_t Tilemap::getTileIdx(uint16_t x, uint16_t y) {
+	return MAP_WIDTH*y + x;
+}
+
 std::vector<Tile *> Tilemap::getTiles(Tile *source, int width, int height) {
     /// Get tiles based on width and height of unit
     std::vector<Tile *> tiles;

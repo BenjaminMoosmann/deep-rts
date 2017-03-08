@@ -10,6 +10,7 @@
 class TownHall: public Unit {
 public:
     TownHall(Player &player);
+	static void construct(State::Unit *state);
 
 
 };

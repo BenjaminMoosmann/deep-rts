@@ -24,7 +24,6 @@ from keras.optimizers import SGD , Adam
 
 GAME = 'warc2sim' # the name of the game being played for log files
 CONFIG = 'nothreshold'
-ACTIONS = 10 # number of valid actions
 GAMMA = 0.99 # decay rate of past observations
 OBSERVATION = 3200. # timesteps to observe before training
 EXPLORE = 3000000. # frames over which to anneal epsilon
@@ -40,10 +39,12 @@ img_rows , img_cols = 30, 30#80, 80
 #Convert image into Black and white
 img_channels = 4 #We stack 4 frames
 
-"""
+
 class DQN:
 
-    def build_model():
+
+
+    def build_model(self):
         print("Now we build the model")
         model = Sequential()
         #print(lambda shape, name: normal(shape, scale=0.01, name=name))
@@ -56,12 +57,165 @@ class DQN:
         model.add(Flatten())
         model.add(Dense(512, init=lambda shape, name: normal(shape, scale=0.01, name=name)))
         model.add(Activation('relu'))
-        model.add(Dense(10 ,init=lambda shape, name: normal(shape, scale=0.01, name=name)))
+        model.add(Dense(1800 ,init=lambda shape, name: normal(shape, scale=0.01, name=name)))
 
         adam = Adam(lr=1e-6)
         model.compile(loss='mse',optimizer=adam)
         print("We finish building the model")
         return model
+
+    def generate_actions(self, tileIDs):
+        types = ["left", "right"] # Left and right click
+        actions = []
+        for type in types:
+            for tileID in tileIDs:
+                actions.append([tileID, type])
+
+        self.actions = actions
+        self.n_actions = len(actions)
+        
+
+    def setup_pretrain(self):
+        self.D = deque()
+        self.OBSERVE = OBSERVATION
+        self.epsilon = INITIAL_EPSILON
+        self.t = 0
+
+    def __init__(self, remoteAI):
+        self.actions = None
+        self.n_actions = None
+        self.D = None # store the previous observations in replay memory
+        self.OBSERVE = None
+        self.epsilon = None
+        self.t = None
+        self.model = self.build_model()
+        self.remoteAI = remoteAI
+        self.last_r = 0;
+
+    def train_step(self, state):
+        if self.n_actions is None:
+            self.generate_actions(state.tileIDs)
+
+
+        L0 = np.reshape(state.tileIDs, (-1, 30))
+        L1 = np.reshape(state.tileResources, (-1, 30))
+        L2 = np.reshape(state.tileOccupant, (-1, 30))
+        L3 = np.reshape(state.tileOccupant, (-1, 30))
+        #L3 = np.reshape(state.unitsType, (-1, 30))
+        #L4 = np.reshape(state.unitsHealth, (-1, 30))
+
+        s_t = np.stack((L0, L1, L2, L3), axis=0)
+
+        s_t = s_t.reshape(1, s_t.shape[0], s_t.shape[1], s_t.shape[2])
+
+        s_t1 = np.append(s_t, s_t[:, :3, :, :], axis=1)
+
+
+        loss = 0
+        Q_sa = 0
+        action_index = 0
+        r_t = 0
+        a_t = np.zeros([self.n_actions])
+
+        if self.t % FRAME_PER_ACTION == 0:
+            if random.random() <= self.epsilon:
+                print("----------Random Action----------")
+                action_index = random.randrange(self.n_actions)
+                a_t[action_index] = 1
+            else:
+                q = self.model.predict(s_t)       #input a stack of 4 images, get the prediction
+                max_Q = np.argmax(q)
+                action_index = max_Q
+                a_t[max_Q] = 1
+
+        #We reduced the epsilon gradually
+        if self.epsilon > FINAL_EPSILON and self.t > self.OBSERVE:
+            self.epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
+
+        json_data = self.remoteAI.doAction(self.actions[action_index])
+
+
+        r_t = json_data["score"]
+        tmp_rt = r_t
+        r_t -= self.last_r
+        self.last_r = tmp_rt
+
+        terminal = json_data["terminal"]
+
+        state1 = self.remoteAI.getState()
+
+        L0 = np.reshape(state1.tileIDs, (-1, 30))
+        L1 = np.reshape(state1.tileResources, (-1, 30))
+        L2 = np.reshape(state1.tileOccupant, (-1, 30))
+        L3 = np.reshape(state1.tileOccupant, (-1, 30))
+        #L3 = np.reshape(state.unitsType, (-1, 30))
+        #L4 = np.reshape(state.unitsHealth, (-1, 30))
+
+        s_t = np.stack((L0, L1, L2, L3), axis=0)
+        s_t = s_t.reshape(1, s_t.shape[0], s_t.shape[1], s_t.shape[2])
+
+        # store the transition in D
+        self.D.append((s_t, action_index, r_t, s_t, terminal))
+        if len(self.D) > REPLAY_MEMORY:
+            self.D.popleft()
+
+
+        #only train if done observing
+        if self.t > self.OBSERVE:
+            #sample a minibatch to train on
+            minibatch = random.sample(self.D, BATCH)
+
+            inputs = np.zeros((BATCH, s_t.shape[1], s_t.shape[2], s_t.shape[3]))   #32, 80, 80, 4
+            targets = np.zeros((inputs.shape[0], self.n_actions))                         #32, 2
+
+            #Now we do the experience replay
+            for i in range(0, len(minibatch)):
+                state_t = minibatch[i][0]
+                action_t = minibatch[i][1]   #This is action index
+                reward_t = minibatch[i][2]
+                state_t1 = minibatch[i][3]
+                terminal = minibatch[i][4]
+                # if terminated, only equals reward
+
+                inputs[i:i + 1] = state_t    #I saved down s_t
+
+                targets[i] = self.model.predict(state_t)  # Hitting each buttom probability
+                Q_sa = self.model.predict(state_t1)
+
+                if terminal:
+                    targets[i, action_t] = reward_t
+                else:
+                    targets[i, action_t] = reward_t + GAMMA * np.max(Q_sa)
+
+            # targets2 = normalize(targets)
+            loss += self.model.train_on_batch(inputs, targets)
+
+        s_t = s_t1
+        self.t = self.t + 1
+
+        # save progress every 10000 iterations
+        if self.t % 100 == 0:
+            print("Now we save model")
+            self.model.save_weights("model.h5", overwrite=True)
+            with open("model.json", "w") as outfile:
+                json.dump(self.model.to_json(), outfile)
+
+        # print info
+        state = ""
+        if self.t <= self.OBSERVE:
+            state = "observe"
+        elif self.t > self.OBSERVE and self.t <= self.OBSERVE + EXPLORE:
+            state = "explore"
+        else:
+            state = "train"
+
+        print("TIMESTEP", self.t, "/ STATE", state, \
+              "/ EPSILON", self.epsilon, "/ ACTION", action_index, "/ REWARD", r_t, \
+              "/ Q_MAX " , np.max(Q_sa), "/ Loss ", loss)
+
+    print("Episode finished!")
+    print("************************")
+
 
     def train_network_continuously(model,args):
         # open up a game state to communicate with emulator
@@ -78,6 +232,9 @@ class DQN:
         do_nothing[0] = 1
 
         r_0, terminal = action_manager.do_action(do_nothing)
+
+
+
         #x_t = game_state.gui.screenshot()
         #x_t = x_t.convert('L') #makes it greyscale
         #x_t = x_t.resize((80, 80))
@@ -217,4 +374,3 @@ class DQN:
         pass
         #model = build_model()
         #t(model,args)
-"""

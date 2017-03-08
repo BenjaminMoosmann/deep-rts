@@ -9,7 +9,7 @@ void Algorithm::setPlayerName(std::string name){
     player.setName(name);
 }
 
-std::shared_ptr<BaseAction> Algorithm::getAction(int actionID, std::shared_ptr<Unit> unitptr) {
+std::shared_ptr<BaseAction> Algorithm::getAction(int actionID, State::Unit * unitptr) {
 
     switch (actionID){
         case Constants::ACTION_NEXT_UNIT:

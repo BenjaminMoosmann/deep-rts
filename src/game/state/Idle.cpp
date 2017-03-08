@@ -4,15 +4,15 @@
 
 #include "Idle.h"
 
-void Idle::update(std::shared_ptr<Unit> unit)const{
+void Idle::update(State::Unit * unit)const{
 
 }
 
-void Idle::init(std::shared_ptr<Unit> unit) const {
+void Idle::init(State::Unit * unit) const {
 
 
 }
 
-void Idle::end(std::shared_ptr<Unit> unit) const {
+void Idle::end(State::Unit * unit) const {
 
 }

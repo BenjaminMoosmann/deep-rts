@@ -221,7 +221,7 @@ void Animation::setupTownHall(){
 
 }
 
-sf::Sprite &Animation::getNext(std::shared_ptr<Unit> unit) {
+sf::Sprite &Animation::getNext(State::Unit * unit) {
     int state = unit->current_state;
     int iteration = unit->animationIterator;
     int unitId = unit->typeId;

@@ -12,13 +12,13 @@ class Unit;
 
 class Harvesting: public BaseState {
 public:
-    Harvesting():BaseState(Constants::State_Harvesting){
+    Harvesting():BaseState(Constants::State::Harvesting){
         name = "Harvesting";
     }
 
-    virtual void update(std::shared_ptr<Unit> unit)const;
-    virtual void init(std::shared_ptr<Unit> unit)const;
-    virtual void end(std::shared_ptr<Unit> unit)const;
+    virtual void update(State::Unit *uState)const;;
+    virtual void init(State::Unit *uState)const;;
+    virtual void end(State::Unit *uState)const;;
 };
 
 #endif //WARC2SIM_HARVESTING_H

@@ -33,12 +33,12 @@ public:
     sf::Vertex vertices[4];
 	sf::Color color;
     Tilemap &tilemap;
-    std::shared_ptr<Unit> occupant = NULL;
+    State::Unit * occupant = NULL;
 
-    bool isAttackable(std::shared_ptr<Unit> unit);
+    bool isAttackable(State::Unit * unit);
     bool isWalkable();
     bool isHarvestable();
-    void setOccupant(std::shared_ptr<Unit> unit);
+    void setOccupant(State::Unit * unit);
 
 
 

@@ -15,149 +15,52 @@
 #include "../state/StateManager.h"
 #include "../Config.h"
 
+#include "../../flatbuffers/Game_generated.h"
+#include "../../flatbuffers/Unit_generated.h"
+#include "../../flatbuffers/Player_generated.h"
+
 
 class Player;
 class BaseState;
 
 
 
-class Unit: public std::enable_shared_from_this<Unit>{
-private:
-    static int gId;
+class Unit{
+
 public:
-    std::shared_ptr<Unit> getptr() {
-        return shared_from_this();
-    }
 
     // Graphics
     double animationInterval = .2 * 10;
     int animationTimer = 0;
     int animationIterator = 0;
 
-    int id;
-    int typeId;
-    int health;
-    int health_max;
-    int current_state;
-    int direction;
+    static bool build(State::Unit *uState, uint16_t idx);
+    static void spawn(State::Unit *uState, uint16_t spawnTile, bool spawnInstantly);
+    static void despawn(State::Unit *uState);
+    static void update(State::Unit *uState);
+	static uint16_t centerTile(State::Unit *uState);
+    
+	static void enqueueState(State::Unit *uState, Constants::State stateID);
+    static void transitionState(State::Unit *uState);
+    static void transitionState(State::Unit *uState, Constants::State stateID);
+    static void setPosition(State::Unit *uState, Tile *tile);
+    static void rightClick(State::Unit *uState, Tile *tile);
+    static void move(State::Unit *uState, Tile *tile);
+    static void attack(State::Unit *uState, Tile *tile);
+    static void harvest(State::Unit *uState, Tile *tile);
+	static void afflictDamage(State::Unit *uState, uint16_t dmg_);
+	static uint16_t getDamage(State::Unit *uState, State::Unit *uStateTarget);
+	static void setDirection(State::Unit *uState, uint16_t newX, uint16_t newY);
+	static void setDirection(State::Unit *uState, sf::Vector2f &dir);
+	static void moveRelative(State::Unit *uState, uint16_t x, uint16_t y);
+	static void rightClickRelative(State::Unit *uState, uint16_t x, uint16_t y);
+	static bool isDead(State::Unit *uState);
 
-
-    int groundUnit;
-    int waterUnit;
-
-    int damageMin = -1;
-    int damageMax = -1;
-    int damageRange = -1;
-    int damagePiercing = -1;
-    int armor = -1;
-
-    int lumberCarry = 0;
-    int goldCarry = 0;
-    int oilCarry = 0;
-    int carryCapacity = 10;
-    std::vector<std::shared_ptr<Unit>> buildInventory;
-    int speed;
-    int sight;
-    int range;
-
-    bool canHarvest;
-    bool canAttack;
-    bool canMove;
-    bool military;
-    bool structure;
-    bool recallable = false;
-
-    int lumberCost;
-    int goldCost;
-    int oilCost;
-
-    int spawnDuration;
-    Tile *spawnTile = NULL;
-
-    int foodProduction;
-    int foodConsumption;
-
-    int width;
-    int height;
-
-    std::string name;
-
-
-    Player &player_;
-
-
-    // State attributes
-
-    // Harvesting
-    double harvestInterval = .5 * 10;
-    int harvestTimer;
-    int harvestIterator;
-    Tile *harvestTarget = NULL;
-
-    // Building
-    int spawnTimer;
-    std::shared_ptr<Unit> buildEntity = NULL;
-    int buildTimer;
-
-    // Combat
-    std::shared_ptr<Unit> combatTarget = NULL;
-    int combatTimer = 1000;
-    double combatInterval = 1 * 10;
-
-    // Walking
-    int walking_timer = 0;
-    std::vector<Tile *> walking_path;
-    Tile *walkingGoal = NULL;
-    double walking_interval = .1 * 10;
-
-
-    Tile *tile = NULL;
-    StateManager& stateManager;
-	std::shared_ptr<BaseState> state = NULL;
-
-    std::vector<std::shared_ptr<BaseState>> stateList;
-
-
-    Unit(Player &player);
-    bool build(int idx);
-    void spawn(Tile &x, int initValue);
-    void despawn();
-    void update();
-	Tile * centerTile();
-    void enqueueState(std::shared_ptr<BaseState> state);
-    void transitionState();
-    void transitionState(std::shared_ptr<BaseState> nextState);
-    void setPosition(Tile &tile);
-    void rightClick(Tile &tile);
-    void move(Tile &targetTile);
-    void attack(Tile &tile);
-    void harvest(Tile &tile);
-    int distance(Tile &tile);
-	int Unit::distance(std::shared_ptr<Unit> unit);
-    sf::Vector2f distanceVector(Tile &target);
-
-
-    void clearTiles();
-
-    std::shared_ptr<Unit> closestRecallBuilding();
-
-
-    bool isDead();
-
-    void afflictDamage(int dmg_);
-
-    int getDamage(Unit &target);
-
-    sf::Vector2f worldPosition;
-
-    void setDirection(int newX, int newY);
-    void setDirection(sf::Vector2f &dir);
-
-    void moveRelative(int x, int y);
-
-    void rightClickRelative(int x, int y);
-
-    bool removedFromGame = false;
+    static uint16_t distance(State::Unit *uState, uint16_t tileID);
+	static uint16_t distance(State::Unit *uStateSource, State::Unit *uStateTarget);
+    static sf::Vector2f distanceVector(State::Unit *uState, uint16_t tileID);
+    static void clearTiles(State::Unit *uState);
+	static uint16_t closestRecallBuilding(State::Unit *uState);
 
 
 };

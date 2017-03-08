@@ -12,13 +12,13 @@ class Unit;
 
 class Despawned: public BaseState {
 public:
-    Despawned():BaseState(Constants::State_Despawned){
+    Despawned():BaseState(Constants::State::Despawned){
         name = "Despawned";
     }
 
-    virtual void update(std::shared_ptr<Unit> unit)const;
-    virtual void init(std::shared_ptr<Unit> unit)const;
-    virtual void end(std::shared_ptr<Unit> unit)const;
+    virtual void update(State::Unit *uState)const;;
+    virtual void init(State::Unit *uState)const;;
+    virtual void end(State::Unit *uState)const;;
 };
 
 

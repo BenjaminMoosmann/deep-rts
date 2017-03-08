@@ -13,48 +13,45 @@
 #include "player/Player.h"
 #include "environment/Tilemap.h"
 #include "action/BaseAction.h"
-
-
-
+#include <flatbuffers.h>
+#include "../flatbuffers/Game_generated.h"
+#include "../flatbuffers/Unit_generated.h"
+#include "../flatbuffers/Player_generated.h"
 class GameMessage;
 class GUI;
 class Game {
+	State::Game *state;
 
-    int n_players;
 
     // Gameclock variables
-    clock_t _update_next;
-    clock_t _render_next;
-    clock_t _stats_next;
+    clock_t update_next_;
+    clock_t render_next_;
+    clock_t stats_next_;
 
-    int _update_interval = 0;
-    int _render_interval = 0;
-    int _caption_interval = 1000;
-
-    int _update_delta = 0;
-    int _render_delta = 0;
+    int update_delta_ = 0;
+    int render_delta_ = 0;
 
 
-    bool running;
-    long ticks = 0;
-	static std::unordered_map<int, Game *> games;
+
 public:
 	
-	static Game * getGame(int id);
-	int id;
+
 
     Tilemap map;
-    int fps;
-    int ups;
 
+	uint16_t getID();
     int getSeconds();
     long getFrames();
 
     StateManager stateManager;
-    std::vector<std::shared_ptr<Player>> players;
-    std::vector<std::shared_ptr<BaseAction>> executedActions;
-    void addAction(std::shared_ptr<BaseAction> action);
 
+	static std::unordered_map<int, Game *> games;
+	std::unordered_map<uint16_t, State::Player * > players;
+	std::unordered_map<uint16_t, State::Unit *> units;
+
+    
+	std::vector<std::shared_ptr<BaseAction>> executedActions; // TODO
+    void addAction(std::shared_ptr<BaseAction> action); // TODO
 
     void loop();
     void update(int ticks);
@@ -77,18 +74,32 @@ public:
 
     void setUPS(int ups_);
 
-    int currentFPS = 0;
-    int currentUPS = 0;
+    uint32_t currentFPS = 0;
+	uint32_t currentUPS = 0;
 
     bool checkTerminal();
 
     bool terminal;
 
-    Player &addPlayer();
+
 
 
 	void deactivateGUI();
 	GameMessage serialize();
+
+	static Game *getGame(uint16_t gameID);
+	State::Player *getPlayer(uint16_t idx);
+	State::Unit *getUnit(uint16_t idx);
+
+
+	uint16_t createPlayer();
+	State::Unit *createUnit(uint16_t unitType);
+
+	uint16_t addPlayer();
+	uint16_t addUnit(State::Unit *uState);
+
+	bool removeUnit(uint16_t unitID);
+
 	std::string serialize_json();
 	void load(GameMessage& gameMessage);
 

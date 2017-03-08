@@ -49,6 +49,9 @@
     <Filter Include="Source Files\game\python">
       <UniqueIdentifier>{10047431-f91d-4af2-97c3-815f943e1bb1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\flatbuffers">
+      <UniqueIdentifier>{34e13626-329a-4aa2-a354-cf083703be4e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\game\action\BaseAction.h">
@@ -186,6 +189,15 @@
     <ClInclude Include="..\..\src\main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\flatbuffers\Unit_generated.h">
+      <Filter>Source Files\game\proto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\flatbuffers\Game_generated.h">
+      <Filter>Source Files\game\proto</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\flatbuffers\Player_generated.h">
+      <Filter>Source Files\game\proto</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\game\action\RightClickAction.cpp">
@@ -313,6 +325,15 @@
     <None Include="packages.config" />
     <None Include="..\..\src\game\python\Main.py">
       <Filter>Source Files\game\python</Filter>
+    </None>
+    <None Include="..\..\src\flatbuffers\Unit.fbs">
+      <Filter>Source Files\flatbuffers</Filter>
+    </None>
+    <None Include="..\..\src\flatbuffers\Game.fbs">
+      <Filter>Source Files\flatbuffers</Filter>
+    </None>
+    <None Include="..\..\src\flatbuffers\Player.fbs">
+      <Filter>Source Files\flatbuffers</Filter>
     </None>
   </ItemGroup>
 </Project>

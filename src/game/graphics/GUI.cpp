@@ -381,7 +381,7 @@ void GUI::drawSelected(){
 
     if (player->targetedUnit) {
         text.setCharacterSize(32);
-        std::shared_ptr<Unit> unit = player->targetedUnit;
+        State::Unit * unit = player->targetedUnit;
         Unit &lel = *unit;
         text.setString(unit->name + " (" +
                        std::to_string(unit->id ) +

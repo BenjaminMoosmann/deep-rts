@@ -8,19 +8,30 @@
 #include "graphics/GUI.h"
 #include "graphics/Animation.h"
 #include "proto/GameMessage.pb.h"
+#include "unit\Peasant.h"
+#include "unit\TownHall.h"
+
 
 std::unordered_map<int, Game*> Game::games;
 
-Game::Game(int _nplayers, bool setup):
+Game::Game(int nplayers_, bool setup):
         map(Tilemap("contested-4v4.json"))
 {
-    // Definitions
-    n_players = _nplayers;
-    setFPS(Config::getInstance().getFPS());
-    setUPS(Config::getInstance().getUPS());
 
-	id = games.size();
-	games[id] = this;
+
+
+	flatbuffers::FlatBufferBuilder fbb;
+	auto state_ptr = State::CreateGame(fbb);
+	fbb.Finish(state_ptr);
+	
+	state = State::GetMutableGame(fbb.GetBufferPointer());;
+	state->id = games.size() - 1;
+	state->running = false;
+	state->fps = Config::getInstance().getFPS();
+	state->ups = Config::getInstance().getUPS();
+	state->updateInterval = Config::getInstance().getUPSInterval();
+	state->renderInterval = Config::getInstance().getFPSInterval();
+	games[state->id] = this;
 
 
     if(setup)
@@ -31,7 +42,7 @@ Game::Game(int _nplayers, bool setup):
 
 void Game::createPlayers(){
 
-    for (int i = 0; i < n_players; i++) {
+    for (int i = 0; i < state->nPlayers; i++) {
         addPlayer();
 
     }
@@ -47,73 +58,73 @@ void Game::load_players(){
 }
 
 void Game::setFPS(int fps_){
-    fps = fps_;
-    _render_interval = 1000.0 / fps;
+    state->fps = fps_;
+    state->renderInterval = 1000.0 / state->fps;
 
 
 }
 
 void Game::setUPS(int ups_){
-    ups = ups_;
-    _update_interval =  1000.0 / ups;
+    state->ups = ups_;
+    state->updateInterval =  1000.0 / state->ups;
 }
 
 void Game::start(){
-    this->running = true;
+    state->running = true;
 }
 
 void Game::stop(){
-    this->running = false;
+    state->running = false;
 }
 
 
 void Game::loop() {
 
     clock_t now = clock();
-    this->_render_next= now + this->_render_interval;
-    this->_update_next = now + this->_update_interval;
-    this->_stats_next = now + 0;
+    this->render_next_= now + state->renderInterval;
+    this->update_next_ = now + this->state->updateInterval;
+    this->stats_next_ = now + 0;
 
 
-    while(this->running) {
+    while(state->running) {
 
 
         now = clock();
 
-        if (now >= this->_update_next) {
+        if (now >= this->update_next_) {
             // Update
 
-            for(auto p : this->players) {
-                p->update();
+            for(auto p : state->players) {
+                //p->update();
             }
 
-            this->_update_next += this->_update_interval;
-            this->_update_delta += 1;
-            this->ticks += 1;
+            this->update_next_ += this->state->updateInterval;
+            this->update_delta_ += 1;
+            state->ticks += 1;
 
         }
 
-        if (now >= this->_render_next) {
+        if (now >= this->render_next_) {
             // Render
 
             gui->update();
             gui->render();
 
 
-            this->_render_next += this->_render_interval;
-            this->_render_delta += 1;
+            this->render_next_ += state->renderInterval;
+            this->render_delta_ += 1;
         }
 
-        if (now >= this->_stats_next) {
+        if (now >= this->stats_next_) {
 
             gui->caption();
             std::cout << "[FPS=" << this->currentFPS << ", UPS=" << this->currentUPS<< "]" << std::endl;
 
-            this->currentFPS = this->_render_delta;
-            this->currentUPS = this->_update_delta;
-            this->_render_delta = 0;
-            this->_update_delta = 0;
-            this->_stats_next += 1000;
+            this->currentFPS = this->render_delta_;
+            this->currentUPS = this->update_delta_;
+            this->render_delta_ = 0;
+            this->update_delta_ = 0;
+            this->stats_next_ += 1000;
         }
 
     }
@@ -123,24 +134,44 @@ void Game::loop() {
 }
 
 long Game::getFrames() {
-    return this->ticks;
+    return state->ticks;
 }
 
-Game * Game::getGame(int id)
+Game * Game::getGame(uint16_t gameID)
 {
-	Game *g = games.at(id);
+	Game *g = games.at(gameID);
+	assert(g && "Game with this id was not found..");
 
 	return g;
 }
 
+State::Player *Game::getPlayer(uint16_t idx)
+{
+	State::Player *p = players[idx];
+	assert(p);
+	return p;
+}
+
+State::Unit *Game::getUnit(uint16_t idx)
+{
+	State::Unit *u = units[idx];
+	assert(u);
+	return u;
+}
+
+uint16_t Game::getID()
+{
+	return state->id;
+}
+
 int Game::getSeconds() {
-    return this->ticks / Config::getInstance().getTickModifier();
+    return state->ticks / Config::getInstance().getTickModifier();
 }
 
 bool Game::checkTerminal(){
 
     int c = 0;
-    for(auto &p : players) {
+    for(auto &p : state->players) {
         if(p->defeated){
             c++;
         }
@@ -156,32 +187,72 @@ void Game::addAction(std::shared_ptr<BaseAction> action) {
     executedActions.push_back(action);
 }
 
-Player &Game::addPlayer() {
-    std::shared_ptr<Player> player = std::shared_ptr<Player>(new Player(*this));
+uint16_t Game::createPlayer() {
 
+	// Create Player State
+	flatbuffers::FlatBufferBuilder fbb;
+	auto state_ptr = State::CreatePlayer(fbb);
+	fbb.Finish(state_ptr);
+
+	State::Player *playerState = State::GetMutablePlayer(fbb.GetBufferPointer());;
+	playerState->id = players.size() - 1;
+	players[playerState->id] = playerState;
+	Player::construct(playerState);
 
     // Retrieve spawn_point
-    int spawnPointIdx = map.spawnTiles[players.size()];
-    Tile &spawnTile = map.tiles[spawnPointIdx];
-
+    int spawnTileID = map.spawnTiles[state->players.size()];
 
     // Spawn Initial builder
-    Unit &builder = player->spawn(spawnTile);
+    int unitID = Player::spawn(playerState, spawnTileID);
 
     // If auto-spawn town hall mechanic is activated
     if(Config::getInstance().getMechanicTownHall()) {
         // build Town-Hall
-        builder.build(0);
+		Unit::build(getUnit(unitID), 0);
     }
-    players.push_back(player);
-    return *player;
+  
+    return playerState->id;
 }
 
 
-GameMessage Game::serialize() {
-    /// Pov player is AI's player
-    GameMessage gameMessage = GameMessage();
+State::Unit *Game::createUnit(uint16_t unitType) {
+	// Create Player State
+	flatbuffers::FlatBufferBuilder fbb;
+	auto state_ptr = State::CreateUnit(fbb);
+	fbb.Finish(state_ptr);
 
+	State::Unit *uState = State::GetMutableUnit(fbb.GetBufferPointer());
+	uState->id = units.size() - 1;
+	uState->currentState = stateManager.despawnedState->id;
+	//units[uState->id] = uState;
+	
+	switch (unitType) {
+
+	case Constants::Unit_Peasant:
+		Peasant::construct(uState);
+		break;
+	case Constants::Unit_Peon:
+		// Todo
+		break;
+	case Constants::Unit_TownHall:
+		TownHall::construct(uState);
+		break;
+	default:
+		throw std::invalid_argument("Unit not implemented (createUnit)");
+		break;
+	}
+
+	return uState;
+
+}
+
+GameMessage Game::serialize() {
+   
+	/// Pov player is AI's player
+    GameMessage gameMessage = GameMessage();
+	return gameMessage;
+
+	/*
     ///
     /// TILE DATA
     ///
@@ -191,18 +262,26 @@ GameMessage Game::serialize() {
 
         gameMessage.add_tileids(t.id_);
         gameMessage.add_tileresources(t.resources);
-        gameMessage.add_tileoccupant((t.occupant) ? t.occupant->id : 0);
+
+		if (t.occupant) {
+			gameMessage.add_tileoccupant(t.occupant->id);
+		}
+		else {
+			gameMessage.add_tileoccupant(0);
+		}
+
+        
     }
     ///
     /// PLAYER DATA
     ///
     int numUnits = 0;
-    for(auto &p: players){
+    for(auto &p: state->players){
         numUnits += p->units.size();
     }
 
     int i = 0;
-    for(auto &p: players){
+    for(auto &p: state->players){
         for(auto &u : p->units){
             Unit &ut = *u;
 
@@ -227,6 +306,7 @@ GameMessage Game::serialize() {
             gameMessage.add_unitsids(u->id);
             gameMessage.add_unitstileid((u->tile) ? u->tile->id_: -1);
             gameMessage.add_unitsstate(u->state->id);
+			// data["unitsPlayerID"].push_back(u->player_.id_);
 
             if(u->combatTarget)
                 gameMessage.add_unitscombattarget(u->combatTarget->id);
@@ -296,14 +376,33 @@ GameMessage Game::serialize() {
     ///
     /// Game Stuff
     ///
-    int gameTicks = ticks;
+    int gameTicks = state->ticks;
 
     gameMessage.add_gameticks(gameTicks);
 
 
-    return gameMessage;
+    return gameMessage;*/
 }
 
+
+bool Game::removeUnit(uint16_t unitID)
+{
+	/*
+	    for(auto p : game_.players) {
+        if(p->targetedUnit == unit) {
+            p->targetedUnit = NULL;
+        }
+    }
+
+    unit->removedFromGame = true;
+
+
+    //units.erase(std::remove(units.begin(), units.end(), unit), units.end());
+    std::cout << "Implement removeUnit" << std::endl;
+
+	*/
+	return false;
+}
 
 std::string Game::serialize_json() {
 	json data;
@@ -348,7 +447,7 @@ std::string Game::serialize_json() {
 	data["lumber"].push_back(lumber);
 	data["oil"].push_back(oil);
 	data["unitCount"].push_back(unitCount);
-	data["gameTicks"] = gameTicks;*/
+	data["gameTicks"] = gameTicks;
 
 	///
 	/// TILE DATA
@@ -369,12 +468,12 @@ std::string Game::serialize_json() {
 	/// PLAYER DATA
 	///
 	int numUnits = 0;
-	for (auto &p : players) {
+	for (auto &p : state->players) {
 		numUnits += p->units.size();
 	}
 
 	int i = 0;
-	for (auto &p : players) {
+	for (auto &p :state->players) {
 		for (auto &u : p->units) {
 			Unit &ut = *u;
 
@@ -468,10 +567,10 @@ std::string Game::serialize_json() {
 	///
 	/// Game Stuff
 	///
-	int gameTicks = ticks;
+	int gameTicks = state->ticks;
 	data["gameTicks"] = gameTicks;
 	data["mapSize"] = { map.MAP_WIDTH, map.MAP_HEIGHT };
-
+	*/
 
 	return data.dump();
 
@@ -480,7 +579,7 @@ std::string Game::serialize_json() {
 
 
 void Game::load(GameMessage& gameMessage) {
-    ///
+    /*///
     /// TILES
     ///
     for (int i = 0; i < map.tiles.size(); i++) {
@@ -491,18 +590,18 @@ void Game::load(GameMessage& gameMessage) {
         t.occupant = NULL;
     }
 
-    ticks = gameMessage.gameticks(0);
+    state->ticks = gameMessage.gameticks(0);
 
     ///
     /// Player
     ///
     int nPlayers = gameMessage.playerid_size();
-    for(auto &p : players){
+    for(auto &p : state->players){
         p->targetedUnit = NULL;
     }
 
-    players.clear();
-    std::map<int, std::shared_ptr<Unit>> unitsMap;
+    state->players.clear();
+    std::map<int, State::Unit *> unitsMap;
     int c = 0;
     for(int i = 0; i < nPlayers; i++) {
         std::shared_ptr<Player> player = std::shared_ptr<Player>(new Player(*this));
@@ -525,7 +624,7 @@ void Game::load(GameMessage& gameMessage) {
 
         int unitCount = gameMessage.unitcount(i);
         for(int j = 0; j < unitCount; j++) {
-            std::shared_ptr<Unit> unit = player->createUnit(gameMessage.unitstype(c));
+            State::Unit * unit = player->createUnit(gameMessage.unitstype(c));
 
 
             unit->walking_timer = gameMessage.unitswalkingtimer(c);
@@ -589,7 +688,7 @@ void Game::load(GameMessage& gameMessage) {
         int unitCount = gameMessage.unitcount(i);
         std::shared_ptr<Player> player = players[i];
         for (int j = 0; j < unitCount; j++) {
-            std::shared_ptr<Unit> unit = player->units[j];
+            State::Unit * unit = player->units[j];
 
 
             int combatTargetID = gameMessage.unitscombattarget(c);
@@ -608,7 +707,7 @@ void Game::load(GameMessage& gameMessage) {
 
             c++;
         }
-    }
+    }*/
 
 
 

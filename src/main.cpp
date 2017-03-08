@@ -27,16 +27,17 @@ int main() {
 
 	// Create game instance
     Game *g = new Game(4, true);
-    Player &player0 = g->addPlayer();
-    Player &player1 = g->addPlayer();
-    Player &player2 = g->addPlayer();
-    Player &player3 = g->addPlayer();
+    uint16_t player0 = g->addPlayer();
+	uint16_t player1 = g->addPlayer();
+	uint16_t player2 = g->addPlayer();
+	uint16_t player3 = g->addPlayer();
 
 
     g->start();
 
-	std::shared_ptr<zmqAI> ai = zmqAI::createInstance(1, 0);
+	std::shared_ptr<zmqAI> ai = zmqAI::createInstance(g->getID(), 0);
 
+	/*
     std::shared_ptr<AlgoRandom> algorithm0 = std::shared_ptr<AlgoRandom>(new AlgoRandom(player0));
     //player0.setAlgorithm(algorithm0);
 
@@ -48,7 +49,7 @@ int main() {
 
     std::shared_ptr<AlgoRandom> algorithm3 = std::shared_ptr<AlgoRandom>(new AlgoRandom(player3));
     //player3.setAlgorithm(algorithm3);
-
+	*/
 
 	//CRemoteAI ai = CRemoteAI::createInstance(g->id);
 

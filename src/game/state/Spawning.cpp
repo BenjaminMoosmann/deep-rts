@@ -6,7 +6,7 @@
 #include "Spawning.h"
 #include "../unit/unit.h"
 
-void Spawning::update(std::shared_ptr<Unit> unit)const{
+void Spawning::update(State::Unit * unit)const{
     unit->spawnTimer += 1;
 
    
@@ -18,10 +18,10 @@ void Spawning::update(std::shared_ptr<Unit> unit)const{
 
 }
 
-void Spawning::init(std::shared_ptr<Unit> unit)const{
+void Spawning::init(State::Unit * unit)const{
 
 }
 
-void Spawning::end(std::shared_ptr<Unit> unit)const{
+void Spawning::end(State::Unit * unit)const{
 
 }

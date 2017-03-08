@@ -12,12 +12,12 @@
 class Spawning: public BaseState{
 
 public:
-    Spawning():BaseState(Constants::State_Spawning){
+    Spawning():BaseState(Constants::State::Spawning){
         name = "Spawning";
     }
-    virtual void update(std::shared_ptr<Unit> unit)const;
-    virtual void init(std::shared_ptr<Unit> unit)const;
-    virtual void end(std::shared_ptr<Unit> unit)const;
+    virtual void update(State::Unit *uState)const;;
+    virtual void init(State::Unit *uState)const;;
+    virtual void end(State::Unit *uState)const;;
 };
 
 

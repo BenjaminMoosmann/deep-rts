@@ -5,50 +5,48 @@
 #include "TownHall.h"
 #include "../player/Player.h"
 
-TownHall::TownHall(Player &player): Unit(player) {
-    typeId = Constants::Unit_TownHall;
-    health = 1200;
-    health_max = 1200;
-    direction = 0;
+void TownHall::construct(State::Unit * state)
+{
+
+	
+
+	
 
 
-    groundUnit = true;
-    waterUnit = false;
+	state->mutate_typeID(Constants::Unit_TownHall);
+	state->mutate_health(1200);
+	state->mutate_maxHealth(1200);
+	state->mutate_direction(0);
+	state->mutate_goundUnit(true);
+	state->mutate_waterUnit(false);
+	state->mutate_damageMin(0);
+	state->mutate_damageMax(0);
+	state->mutate_range(0);
+	state->mutate_damagePiercing(0);
+	state->mutate_armor(0);
 
-    damageMin = 0;
-    damageMax = 0;
-    damageRange = 0;
-    damagePiercing = 0;
-    armor = 0;
+	state->mutate_goldCarry(0);
+	state->mutate_lumberCarry(0);
+	state->mutate_oilCarry(0);
+	state->mutate_carryCapacity(0);
+	state->mutate_speed(0);
+	state->mutate_sight(4);
 
-    goldCarry = 0;
-    lumberCarry = 0;
-    oilCarry = 0;
-    carryCapacity = 0;
-    speed = 0;
-    sight = 4;
 
-    canHarvest = false;
-    canAttack = false;
-    canMove = false;
-    military = false;
-    structure = true;
-    recallable = true;
+	state->mutate_canHarvest(false);
+	state->mutate_canAttack(false);
+	state->mutate_canMove(false);
+	state->mutate_isMilitary(false);
+	state->mutate_isStructure(true);
 
-    lumberCost = 250;
-    goldCost = 500;
-    oilCost = 0;
 
-    spawnDuration = 1; //255 * Config::getInstance().getTickModifier();
-
-    foodProduction = 1;
-    foodConsumption = 0;
-
-    width = 3;
-    height = 3;
-
-    name = "Town-Hall";
-
-    buildInventory = player_.inventoryManager.townhall;
-
+	state->mutate_lumberCost(250);
+	state->mutate_goldCost(500);
+	state->mutate_oilCost(0);
+	state->mutate_spawnDuration(1); //255 * Config::getInstance().getTickModifier();
+	state->mutate_foodProduction(1);
+	state->mutate_foodConsumption(0);
+	state->mutate_width(3);
+	state->mutate_height(3);
+	state->mutable_name = "Town-Hall";
 }

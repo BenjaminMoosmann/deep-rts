@@ -7,18 +7,21 @@
 #include "../Game.h"
 #include "../util/Pathfinder.h"
 
-void Walking::update(std::shared_ptr<Unit> unit)const{
-    if(!unit->walkingGoal){
+void Walking::update(State::Unit *uState)const{
+
+
+    if(!uState->walkGoal()){
         assert(false); //No goal were set!
     }
 
 
-    if (!unit->walking_path.empty()) {
-        unit->walking_timer += 1;
+    if (!uState->walkPath.empty()) {
+		uState->mutate_walkTimer(uState->walkTimer + 1) ;
 
-        if (unit->walking_timer > unit->walking_interval) {
+        if (uState->walkTimer() > uState->walkInterval()) {
 
             // Pop next
+
             Tile * nextTile = unit->walking_path.back();
             unit->walking_path.pop_back();
 
@@ -44,16 +47,16 @@ void Walking::update(std::shared_ptr<Unit> unit)const{
 
 }
 
-void Walking::end(std::shared_ptr<Unit> unit)const{
+void Walking::end(State::Unit *uState)const{
     unit->walking_path.clear();
 }
 
-void Walking::init(std::shared_ptr<Unit> unit)const{
+void Walking::init(State::Unit *uState)const{
     unit->walking_timer = 0;
 
 	Tile *goal = NULL;
 	if (unit->walkingGoal->occupant) {
-		std::shared_ptr<Unit> occupant = unit->walkingGoal->occupant;
+		State::Unit * occupant = unit->walkingGoal->occupant;
 		Tile *closest  = Pathfinder::find_closest_walkable_tile(unit->tile, occupant->tile, occupant->width);
 		goal = closest;
 	}

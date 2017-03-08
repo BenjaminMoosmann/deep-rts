@@ -8,7 +8,7 @@
 #include "../util/Pathfinder.h"
 
 
-void Combat::update(std::shared_ptr<Unit> unit)const{
+void Combat::update(State::Unit * unit)const{
 
     unit->combatTimer += 1;
     if(unit->combatTimer >= unit->combatInterval) {
@@ -46,11 +46,11 @@ void Combat::update(std::shared_ptr<Unit> unit)const{
 
 }
 
-void Combat::end(std::shared_ptr<Unit> unit)const{
+void Combat::end(State::Unit * unit)const{
 
 }
 
-void Combat::init(std::shared_ptr<Unit> unit)const{
+void Combat::init(State::Unit * unit)const{
     sf::Vector2f dir = unit->distanceVector(*unit->combatTarget->tile);
     unit->setDirection(dir);
 

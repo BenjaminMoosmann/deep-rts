@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\flatbuffers\Game_generated.h" />
+    <ClInclude Include="..\..\src\flatbuffers\Player_generated.h" />
+    <ClInclude Include="..\..\src\flatbuffers\Unit_generated.h" />
     <ClInclude Include="..\..\src\game\action\BaseAction.h" />
     <ClInclude Include="..\..\src\game\action\RightClickAction.h" />
     <ClInclude Include="..\..\src\game\algorithms\base\Algorithm.h" />
@@ -101,6 +104,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\README.md" />
+    <None Include="..\..\src\flatbuffers\Game.fbs" />
+    <None Include="..\..\src\flatbuffers\Player.fbs" />
+    <None Include="..\..\src\flatbuffers\Unit.fbs" />
     <None Include="..\..\src\game\data\config.json" />
     <None Include="..\..\src\game\data\maps\contested-4v4.json" />
     <None Include="..\..\src\game\data\tile_properties.json" />
@@ -164,6 +170,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <EnableManagedIncrementalBuild>true</EnableManagedIncrementalBuild>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <IncludePath>C:\vcpkg\packages\flatbuffers_x64-windows\include\flatbuffers;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\vcpkg\packages\flatbuffers_x64-windows\include\flatbuffers;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

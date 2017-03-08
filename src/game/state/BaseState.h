@@ -11,6 +11,11 @@
 #include <iostream>
 #include <memory>
 #include "../Constants.h"
+#include "../../flatbuffers/Game_generated.h"
+#include "../../flatbuffers/Unit_generated.h"
+#include "../../flatbuffers/Player_generated.h"
+
+
 class Unit;
 class BaseState {
 
@@ -18,13 +23,13 @@ class BaseState {
 public:
     int id = 1337;
     std::string name = "**ERR**";
-    BaseState(int id): id(id){
+    BaseState(Constants::State id): id(id){
         std::cout << "setting id to " << id << std::endl;
 
     };
-    virtual void update(std::shared_ptr<Unit> unit)const;
-    virtual void init(std::shared_ptr<Unit> unit)const;
-    virtual void end(std::shared_ptr<Unit> unit)const;
+    virtual void update(State::Unit *uState)const;
+    virtual void init(State::Unit *uState)const;
+    virtual void end(State::Unit *uState)const;
 };
 
 

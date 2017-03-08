@@ -10,12 +10,12 @@ class Unit;
 
 class Combat: public BaseState {
 public:
-    Combat():BaseState(Constants::State_Combat){
+    Combat():BaseState(Constants::State::Combat){
         name = "Combat";
     }
 
-    virtual void update(std::shared_ptr<Unit> unit)const;
-    virtual void init(std::shared_ptr<Unit> unit)const;
-    virtual void end(std::shared_ptr<Unit> unit)const;
+    virtual void update(State::Unit *uState)const;;
+    virtual void init(State::Unit *uState)const;;
+    virtual void end(State::Unit *uState)const;;
 };
 

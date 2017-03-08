@@ -7,12 +7,17 @@
 
 
 #include "../unit/Unit.h"
+#include "../../flatbuffers/Game_generated.h"
+#include "../../flatbuffers/Unit_generated.h"
+#include "../../flatbuffers/Player_generated.h"
 
 class BaseAction {
 protected:
-    std::shared_ptr<Unit> unit;
+    State::Unit * unit;
 public:
-    BaseAction(std::shared_ptr<Unit> unit): unit(unit){};
+
+    BaseAction(State::Unit * unit): unit(unit){};
+
     long tick;                      // At which tick this move was executed;
     virtual void doAction() = 0;         // This function
     virtual void reverseAction() = 0;    // Reverse operation of this action.

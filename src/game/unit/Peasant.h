@@ -12,7 +12,7 @@
 class Peasant: public Unit {
 public:
     Peasant(Player &player);
-
+	static void construct(State::Unit *state);
 
 };
 
