@@ -4,19 +4,32 @@ from logconf import logger
 logger.info("Running PyAI using Python %s" % sys.version)
 import PyAPIRegistry
 from PyAI import PyAI
-from Algorithms.DQN.DQN import DQN
+
+from Algorithms.DQN2.DQN import DQN as DQN2
 
 """
 # DQN Setup
 """
-pyai_dqn = PyAI(name="DQN")  # Create new AI instance
+"""
+pyai_dqn2 = PyAI(name="DQN2")  # Create new AI instance
+observation_space = pyai_dqn2.getState()	# Retrieve state to shape the network
+dqn2 = DQN2(observation_space, num_actions=16)
+pyai_dqn2.agent = dqn2	# Set Agent to DQN
+pyai_dqn2.reset()
+"""
 
+
+from Algorithms.DQN.DQN import DQN
+pyai_dqn = PyAI(name="DQN")  # Create new AI instance
 observation_space = pyai_dqn.getState()	# Retrieve state to shape the network
 dqn = DQN(state_size=observation_space.shape,
               number_of_actions=16,
               save_name="deeprts")  # Create new DQN using the pyai hook
 pyai_dqn.agent = dqn	# Set Agent to DQN
 pyai_dqn.reset()
+
+
+
 
 
 

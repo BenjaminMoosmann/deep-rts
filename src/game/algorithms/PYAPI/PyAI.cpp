@@ -29,7 +29,9 @@ void PyAI::start() {
 	if (pModule == NULL) {
 		PyErr_Print();
 		fprintf(stderr, "Failed to load \"%s\"\n", "Main.py");
+		exit(0);
 		return;
+		
 	}
 
 	Py_DECREF(pModule);
