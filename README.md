@@ -9,10 +9,15 @@ A Real-Time Strategy Simulator for (Deep) Reinforment Learning in Python and C++
 ## Dependencies
 
 * Python >= 3.x
+* CMAKE >= 3.x
+* pygame
+* numpy
+
 
 # Installation
 ```
-sudo pip3 git+https://github.com/UIA-CAIR/DeepRTS
+sudo pip3 git+https://github.com/cair/deep-rts
+# Remember that you also need the assets folder in the working dir. This is included in the installation but can also be downloaded from GIT (recommended)
 ```
 # Available maps
 ```
