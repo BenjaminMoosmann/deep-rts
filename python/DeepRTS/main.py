@@ -1,10 +1,10 @@
-
+import pyximport
+pyximport.install(language_level=3)
 if __name__ == "__main__":
-
     from DeepRTS import PyDeepRTS
 
     import time
-    g = PyDeepRTS('10x10-2v2.json', n_players=2)
+    g = PyDeepRTS('15x15-2v2.json', n_players=2)
     g.set_max_fps(10000000)
     g.set_max_ups(10000000)
 
