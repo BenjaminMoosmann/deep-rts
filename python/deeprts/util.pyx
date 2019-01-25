@@ -1,8 +1,17 @@
 import pygame
 import math
+import numpy as np
+import cv2
 
-import os
-import shutil
+cdef class Util:
+
+    @staticmethod
+    cdef public composite(fg, bg):
+        a = fg[:, :, 3, np.newaxis]
+        #a = (np.multiply(fg[:,:,3], 1.0 / 255))[:,:,np.newaxis]
+        blended = cv2.convertScaleAbs(fg * a + bg * (1-a))
+        return blended
+
 
 def image_at(sheet, tile_n, tile_size=32):
     size = sheet.get_size()

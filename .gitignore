@@ -225,3 +225,4 @@ docs/docs.iml
 project/msvc14/.vs/WarC2Sim++/v14/.suo
 python/DeepRTS/assets
 *.iml
+/python/deeprts/deeprts.cpython-37m-x86_64-linux-gnu.so

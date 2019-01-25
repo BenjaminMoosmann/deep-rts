@@ -1,9 +1,12 @@
 import pyDeepRTS
 import util
-from gui import GUI as PygameGUI
 import os
 import shutil
+
 import numpy as np
+
+from fastgui import GUI
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -12,7 +15,7 @@ class PyDeepRTS(pyDeepRTS.Game):
 
     @staticmethod
     def setup_data_files():
-        template_data = os.path.join(dir_path, "..", "..", "assets")
+        template_data = os.path.join(os.getcwd(), "..", "..", "assets")  # TODO getcwd
         target_data = os.path.join(os.getcwd(), "assets")
         util.copytree(template_data, target_data, ignore=shutil.ignore_patterns('config.json'))
 
@@ -31,7 +34,7 @@ class PyDeepRTS(pyDeepRTS.Game):
         self.selected_player = None
         self.set_player(self.players[0])
 
-        self.gui = PygameGUI(self)
+        self.gui = GUI(self)
         self._render_every = 1
         self._view_every = 1
         self._capture_every = 1
@@ -68,14 +71,13 @@ class PyDeepRTS(pyDeepRTS.Game):
         self._capture_every = n
 
     def _caption(self):
-        self.gui.set_caption("DeepRTS v2.0 - [FPS=%d UPS=%d MUL=x%d]" %
+        pass
+        """self.gui.set_caption("DeepRTS v2.0 - [FPS=%d UPS=%d MUL=x%d]" %
                              (
                                  self.get_fps(),
                                  self.get_ups(),
                                  self.get_ups() / self.get_ticks_modifier()
-                             ))
-
-        pass
+                             ))"""
 
     def _on_unit_create(self, unit):
         pass

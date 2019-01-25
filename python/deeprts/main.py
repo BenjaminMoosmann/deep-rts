@@ -1,9 +1,9 @@
 import pyximport
 pyximport.install(language_level=3)
-if __name__ == "__main__":
-    from DeepRTS import PyDeepRTS
+from deeprts import PyDeepRTS
+import time
 
-    import time
+if __name__ == "__main__":
     g = PyDeepRTS('15x15-2v2.json', n_players=2)
     g.set_max_fps(10000000)
     g.set_max_ups(10000000)
@@ -21,7 +21,7 @@ if __name__ == "__main__":
         g.render()
         g.caption()
         g.view()
-        
+
 
         if g.is_terminal():
             g.reset()
